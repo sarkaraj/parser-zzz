@@ -37,6 +37,7 @@ object fileTransformations {
         listOfFiles.foreach(file => {
 
           if (file.getName == "BALogFile.txt") {
+            println("Opening file BALog")
             val BALogRDD = sc.textFile(file.getAbsolutePath)
             val header = BALogRDD.first()
             val headerArray = header.split(";")
@@ -121,6 +122,76 @@ object fileTransformations {
                         }).repartition(1)
                         rowData.saveAsTextFile("D:\\Daimler\\src\\main\\resources\\testOutput\\" + date.getName + "\\" + folder.getName)*/
 
+
+          }
+
+          else if (file.getName == "DosKonfigLog.txt") {
+            println("Opening file Dos")
+            val BALogRDD = sc.textFile(file.getAbsolutePath)
+            val header = BALogRDD.first()
+            val headerArray = header.split(";")
+            val headerLength = headerArray.size
+            val indices = ArrayBuffer.empty[Int]
+            var index = 0
+            while (headerArray.indexOf("Message number", index) != -1) {
+              index = headerArray.indexOf("Message number", index)
+              indices += index
+              index += 1
+            }
+            val index_limits = {
+              indices.slice(1, indices.length)
+                .map(numb => {
+                  numb - 1
+                })
+            }
+
+            //            println(indices)
+            //            println(index_limits)
+
+            val RDDLength = (BALogRDD.count() - 1).toInt
+            val currRow = new AtomicInteger(0)
+            val currCol = new AtomicInteger(0)
+
+            val masterArray = ArrayBuffer.fill(headerLength, RDDLength)("")
+
+            val rowData = BALogRDD.filter(_ != header)
+              .map(_ + "a")
+              .map(line => {
+                val someArray = line.split(";")
+                val slicedArray = someArray.slice(0, someArray.size - 1)
+                slicedArray
+              })
+            //              .collect()
+
+
+            //            println(rowData.count())
+
+            val rowDataTranspose = rowData.collect() // it is not transposed for this test case
+            val rowDataTranspose_rows = rowDataTranspose.length // The size is 3 -> number of lines in input file
+
+            val arrayToWrite = ArrayBuffer.empty[Array[String]]
+            index_limits += headerLength
+            //            println(index_limits)
+            var row_count_arrayToWrite = 0
+
+            for (k <- 0 until rowDataTranspose_rows) {
+              var temp_count = 0
+              //              println("Enter K loop")
+              for (i <- index_limits) {
+                //                println("Enter i loop")
+                var value = ""
+                for (j <- temp_count until i) {
+                  //                  println("Enter j loop")
+                  // until is exclusive of the last element
+                  value += rowDataTranspose(k)(j) + ";"
+                }
+                //                arrayToWrite += value.split(",")
+                value = lineNumber + value
+                println(value)
+                row_count_arrayToWrite += 1
+                temp_count = i
+              }
+            }
 
           }
         })
