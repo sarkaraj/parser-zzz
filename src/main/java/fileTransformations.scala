@@ -79,13 +79,13 @@ object fileTransformations {
             val rowDataTranspose = rowData.collect() // it is not transposed for this test case
             val rowDataTranspose_rows = rowDataTranspose.length // The size is 3 -> number of lines in input file
 
-            var temp_count = 0
             val arrayToWrite = ArrayBuffer.empty[Array[String]]
             index_limits += headerLength
             //            println(index_limits)
             var row_count_arrayToWrite = 0
 
             for (k <- 0 until rowDataTranspose_rows) {
+              var temp_count = 0
               //              println("Enter K loop")
               for (i <- index_limits) {
                 //                println("Enter i loop")
@@ -93,9 +93,10 @@ object fileTransformations {
                 for (j <- temp_count until i) {
                   //                  println("Enter j loop")
                   // until is exclusive of the last element
-                  value += rowDataTranspose(k)(j) + ","
+                  value += rowDataTranspose(k)(j) + ";"
                 }
                 //                arrayToWrite += value.split(",")
+                value = lineNumber + value
                 println(value)
                 row_count_arrayToWrite += 1
                 temp_count = i
